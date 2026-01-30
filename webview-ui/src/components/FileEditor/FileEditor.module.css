@@ -1,0 +1,161 @@
+/* Shared styles for fields */
+.group {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.colorWrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.colorInput {
+  height: 36px;
+  width: 60px;
+  cursor: pointer;
+  padding: 0;
+  border: 1px solid var(--vscode-input-border);
+  background: var(--vscode-input-background);
+}
+
+/* Image Upload */
+.imageWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.imageRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.uploadBtn {
+  padding: 6px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.uploadBtn:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.uploadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.preview {
+  width: 100%;
+  max-width: 300px;
+  max-height: 200px;
+  object-fit: contain;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  background: var(--vscode-editor-background);
+  padding: 4px;
+  display: block;
+}
+
+/* Array Field */
+.arrayContainer {
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  padding: 12px;
+  background: var(--vscode-input-background);
+}
+
+.arrayItem {
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--vscode-editor-background);
+}
+
+.arrayItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.arrayItemTitle {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.removeBtn {
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: var(--vscode-errorForeground);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.removeBtn:hover {
+  opacity: 0.8;
+}
+
+.addBtn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.arrayField {
+  margin-bottom: 12px;
+}
+.arrayField label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  display: block;
+  font-weight: 600;
+}

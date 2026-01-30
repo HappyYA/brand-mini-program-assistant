@@ -1,0 +1,20 @@
+.vscode/**
+.vscode-test/**
+src/**
+.gitignore
+.yarnrc
+vsc-extension-quickstart.md
+**/tsconfig.json
+**/.eslintrc.json
+**/*.map
+**/*.ts
+node_modules/**
+.git/**
+.DS_Store
+*.vsix
+
+# 示例脚本/数据默认不打包进扩展
+example/**
+example/**/*
+webview-ui/**
+.github/**

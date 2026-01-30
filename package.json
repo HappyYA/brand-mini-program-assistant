@@ -1,0 +1,154 @@
+{
+  "name": "brand-mini-program-assistant",
+  "displayName": "品牌小程序助手",
+  "description": "品牌小程序助手：主题配置可视化编辑与小程序信息查看",
+  "version": "0.0.2",
+  "publisher": "lijinya",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "theme",
+    "config",
+    "json",
+    "editor"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lijinya/brand-mini-program-assistant"
+  },
+  "icon": "icon.png",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onView:themeConfigExplorer",
+    "onCommand:themeConfigEditor.open",
+    "onCommand:themeConfigEditor.openFile",
+    "onCommand:themeConfigEditor.refreshTree",
+    "onCommand:themeConfigEditor.createFile",
+    "onCommand:themeConfigEditor.deleteFile",
+    "onCommand:themeConfigEditor.openMiniInfo"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "品牌小程序助手",
+      "properties": {
+        "themeConfigEditor.imageUploadUrl": {
+          "type": "string",
+          "default": "",
+          "description": "图片上传接口地址（POST FormData: file）。为空时将禁用上传并提示用户配置。"
+        },
+        "themeConfigEditor.webviewConnectSrc": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Webview 的 CSP connect-src 白名单（空数组表示仅允许自动加入的 imageUploadUrl 域名 origin）。示例：['https://api.example.com','https://*.example.com']"
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "themeConfigExplorer",
+          "name": "品牌小程序助手",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "themeConfigEditor.open",
+        "title": "打开品牌小程序助手",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "themeConfigEditor.openMiniInfo",
+        "title": "打开小程序信息",
+        "icon": "$(info)"
+      },
+      {
+        "command": "themeConfigEditor.openFile",
+        "title": "打开配置文件",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "themeConfigEditor.refreshTree",
+        "title": "刷新",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "themeConfigEditor.createFile",
+        "title": "新建配置",
+        "icon": "$(add)"
+      },
+      {
+        "command": "themeConfigEditor.deleteFile",
+        "title": "删除配置文件",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "themeConfigEditor.refreshTree",
+          "when": "view == themeConfigExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "themeConfigEditor.createFile",
+          "when": "view == themeConfigExplorer && viewItem == themeGroup",
+          "group": "inline"
+        },
+        {
+          "command": "themeConfigEditor.openMiniInfo",
+          "when": "view == themeConfigExplorer && viewItem == miniInfo",
+          "group": "inline"
+        },
+        {
+          "command": "themeConfigEditor.openFile",
+          "when": "view == themeConfigExplorer && viewItem == themeFile",
+          "group": "inline"
+        },
+        {
+          "command": "themeConfigEditor.deleteFile",
+          "when": "view == themeConfigExplorer && viewItem == themeFile",
+          "group": "inline"
+        }
+      ],
+      "editor/title": [],
+      "commandPalette": [
+        {
+          "command": "themeConfigEditor.open",
+          "when": "editorLangId == json"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "explorer",
+        "contents": "检测到主题配置。 [打开品牌小程序助手](command:themeConfigEditor.open)"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "build:webview": "cd webview-ui && npm run build",
+    "compile": "npm run build:webview && tsc -p ./ && npm run copy-resources",
+    "watch": "npm run build:webview && npm run copy-resources && tsc -watch -p ./",
+    "copy-resources": "mkdir -p out/webview",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^2.32.0",
+    "typescript": "^4.9.0"
+  }
+}
