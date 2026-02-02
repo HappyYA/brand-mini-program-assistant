@@ -12,29 +12,25 @@ interface FileEditorProps {
 }
 // Default keys structure to know types
 const KEYS_CONFIG = [
-  { key: "appId", label: "App ID", type: "text" },
+  { key: "appId", label: "小程序App ID", type: "text" },
   { key: "brandCode", label: "Brand Code", type: "text" },
   { key: "groupCode", label: "Group Code", type: "text" },
-  { key: "themeColor", label: "Theme Color", type: "color" },
-  { key: "homeBg", label: "Home Bg", type: "image" },
-  { key: "myHeaderBg", label: "My Header Bg", type: "image" },
-  { key: "myHeaderTextColor", label: "My Header Text Color", type: "color" },
-  {
-    key: "myHeaderTextGrayColor",
-    label: "My Header Text Gray Color",
-    type: "text",
-  },
-  { key: "tabbarHomeBgColor", label: "Tabbar Home Bg Color", type: "color" },
-  { key: "defaultAvatar", label: "Default Avatar", type: "image" },
-  { key: "memberCard", label: "Member Card", type: "boolean" },
+  { key: "themeColor", label: "主题颜色", type: "color" },
+  { key: "homeBackgroundImage", label: "首页背景图片", type: "image" },
+  { key: "homeBackgroundColor", label: "首页背景颜色", type: "color" },
+  { key: "myHeaderBg", label: "我的页面背景图片", type: "image" },
+  { key: "myHeaderTextColor", label: "头像右侧文字正常颜色", type: "color" },
+  { key: "myHeaderTextGrayColor", label: "头像右侧文字浅颜色", type: "text" },
+  { key: "defaultAvatar", label: "默认头像图片", type: "image" },
+  { key: "memberCard", label: "付费会员开关", type: "boolean" },
   {
     key: "tabbar",
-    label: "TabBar Configuration",
+    label: "底部导航栏配置",
     type: "array",
     schema: [
-      { key: "pagePath", label: "Page Path", type: "text" },
-      { key: "text", label: "Tab Text", type: "text" },
-      { key: "hidden", label: "Hidden", type: "boolean" },
+      { key: "pagePath", label: "页面路径", type: "text" },
+      { key: "text", label: "底部导航栏文字", type: "text" },
+      { key: "hidden", label: "是否隐藏显示", type: "boolean" },
     ],
   },
 ] as const;
