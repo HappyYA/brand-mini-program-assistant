@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import styles from './FileEditor.module.css';
 import { vscode } from '../../utils/vscode';
 
@@ -6,7 +6,10 @@ interface FieldProps {
   label: string;
   value: any;
   onChange: (value: any) => void;
-  type?: 'text' | 'color' | 'image' | 'boolean';
+  type?: 'text' | 'color' | 'image' | 'boolean' | 'singleSelectWithCustomText';
+  options?: Array<{ value: number; label: string }>;
+  customOptionValue?: number; // default 3
+  customTextPlaceholder?: string;
 }
 
 export const Field: React.FC<FieldProps> = ({
@@ -14,9 +17,13 @@ export const Field: React.FC<FieldProps> = ({
   value,
   onChange,
   type = 'text',
+  options,
+  customOptionValue = 3,
+  customTextPlaceholder,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const radioName = useId();
 
   // Helper to upload image (using the global config which injects the URL)
   const handleUpload = async (file: File) => {
@@ -141,6 +148,74 @@ export const Field: React.FC<FieldProps> = ({
             <img src={value} alt="Preview" className={styles.preview} />
           )}
         </div>
+      </div>
+    );
+  }
+
+  if (type === 'singleSelectWithCustomText') {
+    const opts =
+      options && options.length > 0
+        ? options
+        : [
+            { value: 1, label: '显示资产' },
+            { value: 2, label: '不显示资产' },
+            { value: 3, label: '自定义' },
+          ];
+
+    const safeValue =
+      value && typeof value === 'object'
+        ? { type: Number((value as any).type) || 1, text: String((value as any).text || '') }
+        : { type: 1, text: '' };
+
+    const selectedType = safeValue.type;
+    const customText = safeValue.text;
+
+    const setType = (t: number) => {
+      onChange({
+        type: t,
+        text: t === customOptionValue ? customText : '',
+      });
+    };
+
+    return (
+      <div className={styles.group}>
+        <label className={styles.label}>{label}</label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+          {opts.map((opt) => (
+            <label
+              key={opt.value}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <input
+                type="radio"
+                name={radioName}
+                checked={selectedType === opt.value}
+                onChange={() => setType(opt.value)}
+              />
+              <span>{opt.label}</span>
+            </label>
+          ))}
+        </div>
+
+        {selectedType === customOptionValue && (
+          <div style={{ marginTop: '10px' }}>
+            <input
+              type="text"
+              className={styles.input}
+              value={customText}
+              placeholder={customTextPlaceholder || '请输入自定义文案'}
+              onChange={(e) =>
+                onChange({ type: customOptionValue, text: e.target.value })
+              }
+            />
+          </div>
+        )}
       </div>
     );
   }

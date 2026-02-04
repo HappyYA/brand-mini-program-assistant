@@ -29,6 +29,19 @@ const KEYS_CONFIG = [
   { key: "defaultAvatar", label: "默认头像图片", type: "image" },
   { key: "memberCard", label: "付费会员开关", type: "boolean" },
   {
+    key: "cancelAccountTextType",
+    label: "注销账号文案类型",
+    type: "singleSelectWithCustomText",
+    options: [
+      { value: 1, label: "显示资产" },
+      { value: 2, label: "不显示资产" },
+      { value: 3, label: "自定义" },
+    ],
+    defaultValue: { type: 1, text: "" },
+    customOptionValue: 3,
+    customTextPlaceholder: "请输入自定义文案",
+  },
+  {
     key: "tabbar",
     label: "底部导航栏配置",
     type: "array",
@@ -63,6 +76,11 @@ export const FileEditor: React.FC<FileEditorProps> = ({
         } else if (cfg.type === "boolean") {
           // @ts-ignore
           merged[cfg.key] = false;
+        } else if (cfg.type === "singleSelectWithCustomText") {
+          // @ts-ignore
+          merged[cfg.key] = cfg.defaultValue
+            ? { ...cfg.defaultValue }
+            : { type: 1, text: "" };
         } else {
           // @ts-ignore
           merged[cfg.key] = "";
@@ -117,6 +135,12 @@ export const FileEditor: React.FC<FileEditorProps> = ({
               label={field.label}
               // @ts-ignore
               type={field.type}
+              // @ts-ignore
+              options={field.options}
+              // @ts-ignore
+              customOptionValue={field.customOptionValue}
+              // @ts-ignore
+              customTextPlaceholder={field.customTextPlaceholder}
               value={content[field.key]}
               onChange={(val) => handleChange(field.key, val)}
             />

@@ -52,6 +52,37 @@ function findFirstEmptyPath(
     if (keys.length === 0) {
       return path.join('.') || '(root)';
     }
+
+    // Special-case: { type: 1|2|3, text: string } where text is only required when type === 3
+    // This is used by the "注销账号文案类型" config: { type: 1, text: '' }.
+    if (
+      'type' in obj &&
+      'text' in obj &&
+      typeof (obj as any).text === 'string' &&
+      Object.keys(obj).length === 2
+    ) {
+      const rawType = (obj as any).type;
+      const t =
+        typeof rawType === 'number'
+          ? rawType
+          : typeof rawType === 'string'
+            ? Number(rawType)
+            : NaN;
+
+      if (!Number.isNaN(t)) {
+        const foundType = findFirstEmptyPath(obj.type, [...path, 'type']);
+        if (foundType) return foundType;
+
+        if (t === 3) {
+          const foundText = findFirstEmptyPath(obj.text, [...path, 'text']);
+          if (foundText) return foundText;
+        }
+
+        // type !== 3 时允许 text 为空，不参与校验
+        return null;
+      }
+    }
+
     for (const k of keys) {
       const found = findFirstEmptyPath(obj[k], [...path, k]);
       if (found) {
