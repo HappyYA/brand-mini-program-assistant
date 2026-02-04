@@ -17,6 +17,11 @@ const KEYS_CONFIG = [
   { key: "groupCode", label: "Group Code", type: "text" },
   { key: "themeColor", label: "主题颜色", type: "color" },
   { key: "homeBackgroundImage", label: "首页背景图片", type: "image" },
+  {
+    key: "homeBackgroundImageMini",
+    label: "首页背景图片(小图)",
+    type: "image",
+  },
   { key: "homeBackgroundColor", label: "首页背景颜色", type: "color" },
   { key: "myHeaderBg", label: "我的页面背景图片", type: "image" },
   { key: "myHeaderTextColor", label: "头像右侧文字正常颜色", type: "color" },
