@@ -2,7 +2,7 @@
   "name": "brand-mini-program-assistant",
   "displayName": "品牌小程序助手",
   "description": "品牌小程序助手：主题配置可视化编辑与小程序信息查看",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "lijinya",
   "engines": {
     "vscode": "^1.75.0"
