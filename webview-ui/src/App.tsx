@@ -62,11 +62,10 @@ function App() {
   }, [currentFile, currentContent]);
 
   const handleCreateFile = useCallback((fileName: string) => {
-    vscode.postMessage({
-      command: "createFile",
-      fileName: fileName.endsWith(".json") ? fileName : `${fileName}.json`,
-      content: { tabbar: [] },
-    });
+    // 与“主题配置”入口右侧加号一致：这里只打开草稿，不落盘创建文件；
+    // 真正创建与空值校验都在用户点击“保存”时发生（saveFile）。
+    const normalized = fileName.endsWith(".json") ? fileName : `${fileName}.json`;
+    vscode.postMessage({ command: "getFileContent", fileName: normalized });
     setIsDialogVisible(false);
   }, []);
 
