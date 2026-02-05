@@ -42,6 +42,18 @@ const KEYS_CONFIG = [
     customTextPlaceholder: "请输入自定义文案",
   },
   {
+    key: "cancelAccountWay",
+    label: "注销账号方式",
+    type: "singleSelectWithCustomText",
+    options: [
+      { value: 1, label: "自主注销" },
+      { value: 2, label: "电话注销" },
+    ],
+    defaultValue: { type: 1, text: "" },
+    customOptionValue: 2,
+    customTextPlaceholder: "请输入品牌电话号码",
+  },
+  {
     key: "tabbar",
     label: "底部导航栏配置",
     type: "array",
