@@ -27,7 +27,14 @@ const KEYS_CONFIG = [
   { key: "myHeaderTextColor", label: "头像右侧文字正常颜色", type: "color" },
   { key: "myHeaderTextGrayColor", label: "头像右侧文字浅颜色", type: "text" },
   { key: "defaultAvatar", label: "默认头像图片", type: "image" },
+  { key: "realNameAuthBg", label: "实名认证背景图", type: "image" },
   { key: "memberCard", label: "付费会员开关", type: "boolean" },
+  {
+    key: "memberCardGradientBg",
+    label:
+      "付费会员梯度按钮背景色（示例：linear-gradient(90deg, #FFF6E2 0%, #FFFBF1 100%)）",
+    type: "text",
+  },
   {
     key: "cancelAccountTextType",
     label: "注销账号文案类型",
