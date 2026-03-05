@@ -2,43 +2,80 @@ import React, { useEffect, useState } from "react";
 import styles from "./FileEditor.module.css";
 import { Field } from "./Field";
 import { ArrayField } from "./ArrayField";
-import type { ThemeConfig } from "../../types";
+import type { ThemeConfig, ValidationRule } from "../../types";
+
+type FieldType =
+  | "text"
+  | "color"
+  | "image"
+  | "boolean"
+  | "singleSelectWithCustomText"
+  | "array";
 
 interface FileEditorProps {
   fileName: string;
   initialContent: ThemeConfig;
   onChange: (content: ThemeConfig) => void;
-  onSave: () => void;
+  onSave: (rules: ValidationRule[]) => void;
 }
 // Default keys structure to know types
 const KEYS_CONFIG = [
-  { key: "appId", label: "小程序App ID", type: "text" },
-  { key: "brandCode", label: "Brand Code", type: "text" },
-  { key: "groupCode", label: "Group Code", type: "text" },
-  { key: "themeColor", label: "主题颜色", type: "color" },
-  { key: "homeBackgroundImage", label: "首页背景图片", type: "image" },
+  { key: "appId", label: "小程序App ID", type: "text", required: true },
+  { key: "brandCode", label: "Brand Code", type: "text", required: true },
+  { key: "groupCode", label: "Group Code", type: "text", required: true },
+  { key: "themeColor", label: "主题颜色", type: "color", required: true },
+  {
+    key: "homeBackgroundImage",
+    label: "首页背景图片",
+    type: "image",
+    required: true,
+  },
   {
     key: "homeBackgroundImageMini",
     label: "首页背景图片(小图)",
     type: "image",
+    required: true,
   },
-  { key: "homeBackgroundColor", label: "首页背景颜色", type: "color" },
-  { key: "myHeaderBg", label: "我的页面背景图片", type: "image" },
-  { key: "myHeaderTextColor", label: "头像右侧文字正常颜色", type: "color" },
-  { key: "myHeaderTextGrayColor", label: "头像右侧文字浅颜色", type: "text" },
-  { key: "defaultAvatar", label: "默认头像图片", type: "image" },
-  { key: "realNameAuthBg", label: "实名认证背景图", type: "image" },
-  { key: "memberCard", label: "付费会员开关", type: "boolean" },
+  {
+    key: "homeBackgroundColor",
+    label: "首页背景颜色",
+    type: "color",
+    required: true,
+  },
+  { key: "myHeaderBg", label: "我的页面背景图片", type: "image", required: true },
+  {
+    key: "myHeaderTextColor",
+    label: "头像右侧文字正常颜色",
+    type: "color",
+    required: true,
+  },
+  {
+    key: "myHeaderTextGrayColor",
+    label: "头像右侧文字浅颜色",
+    type: "text",
+    required: true,
+  },
+  { key: "defaultAvatar", label: "默认头像图片", type: "image", required: true },
+  { key: "realNameAuthBg", label: "实名认证背景图", type: "image", required: true },
+  { key: "memberCard", label: "付费会员开关", type: "boolean", required: true },
   {
     key: "memberCardGradientBg",
     label:
       "付费会员梯度按钮背景色（示例：linear-gradient(90deg, #FFF6E2 0%, #FFFBF1 100%)）",
     type: "text",
+    required: false,
+  },
+  {
+    key: "memberCardTimerBg",
+    label: "付费会员身份验证倒计时背景",
+    type: "image",
+    required: false,
   },
   {
     key: "cancelAccountTextType",
     label: "注销账号文案类型",
     type: "singleSelectWithCustomText",
+    required: true,
     options: [
       { value: 1, label: "显示资产" },
       { value: 2, label: "不显示资产" },
@@ -52,6 +89,7 @@ const KEYS_CONFIG = [
     key: "cancelAccountWay",
     label: "注销账号方式",
     type: "singleSelectWithCustomText",
+    required: true,
     options: [
       { value: 1, label: "自主注销" },
       { value: 2, label: "电话注销" },
@@ -64,10 +102,11 @@ const KEYS_CONFIG = [
     key: "tabbar",
     label: "底部导航栏配置",
     type: "array",
+    required: true,
     schema: [
-      { key: "pagePath", label: "页面路径", type: "text" },
-      { key: "text", label: "底部导航栏文字", type: "text" },
-      { key: "hidden", label: "是否隐藏显示", type: "boolean" },
+      { key: "pagePath", label: "页面路径", type: "text", required: true },
+      { key: "text", label: "底部导航栏文字", type: "text", required: true },
+      { key: "hidden", label: "是否隐藏显示", type: "boolean", required: true },
     ],
   },
 ] as const;
@@ -131,6 +170,22 @@ export const FileEditor: React.FC<FileEditorProps> = ({
     onChange(newContent);
   };
 
+  const getValidationRules = (): ValidationRule[] => {
+    return KEYS_CONFIG.map((field) => ({
+      key: field.key,
+      type: field.type as FieldType,
+      required: field.required ?? true,
+      // @ts-ignore
+      customOptionValue: field.customOptionValue,
+      // @ts-ignore
+      schema: field.schema?.map((subField: any) => ({
+        key: subField.key,
+        type: subField.type as FieldType,
+        required: subField.required ?? true,
+      })),
+    }));
+  };
+
   return (
     <div style={{ paddingBottom: "90px" }}>
       <div id="formContainer">
@@ -191,7 +246,7 @@ export const FileEditor: React.FC<FileEditorProps> = ({
         }}
       >
         <button
-          onClick={onSave}
+          onClick={() => onSave(getValidationRules())}
           style={{
             padding: "8px 16px",
             backgroundColor: "var(--vscode-button-background)",

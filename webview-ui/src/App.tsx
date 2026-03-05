@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import styles from "./App.module.css";
 import { vscode } from "./utils/vscode";
-import type { ThemeConfig, WebviewMessage } from "./types.ts";
+import type { ThemeConfig, ValidationRule, WebviewMessage } from "./types.ts";
 import { FileList } from "./components/FileList";
 import { FileEditor } from "./components/FileEditor";
 import { InputDialog } from "./components/InputDialog";
@@ -51,12 +51,13 @@ function App() {
     vscode.postMessage({ command: "getFileContent", fileName });
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback((validationRules: ValidationRule[]) => {
     if (currentFile && currentContent) {
       vscode.postMessage({
         command: "saveFile",
         fileName: currentFile,
         content: currentContent,
+        validationRules,
       });
     }
   }, [currentFile, currentContent]);

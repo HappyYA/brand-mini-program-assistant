@@ -14,6 +14,20 @@ export interface ThemeConfig {
   [key: string]: any;
 }
 
+export interface ValidationRule {
+  key: string;
+  type:
+    | 'text'
+    | 'color'
+    | 'image'
+    | 'boolean'
+    | 'singleSelectWithCustomText'
+    | 'array';
+  required?: boolean;
+  customOptionValue?: number;
+  schema?: ValidationRule[];
+}
+
 /**
  * Webview 消息类型
  */
@@ -22,6 +36,7 @@ export interface WebviewMessage {
   fileName?: string;
   content?: ThemeConfig | string;
   text?: string;
+  validationRules?: ValidationRule[];
 }
 
 /**

@@ -17,81 +17,134 @@ import { isValidFileName } from './utils/validators';
 import { WebviewMessage, ThemeConfig } from './types';
 import { promises as fs } from 'fs';
 
-function findFirstEmptyPath(
+type ValidationRule = {
+  key: string;
+  type:
+    | 'text'
+    | 'color'
+    | 'image'
+    | 'boolean'
+    | 'singleSelectWithCustomText'
+    | 'array';
+  required?: boolean;
+  customOptionValue?: number;
+  schema?: ValidationRule[];
+};
+
+function findFirstRequiredEmptyPathByRule(
   value: unknown,
-  path: string[] = [],
+  rule: ValidationRule,
+  path: string[],
 ): string | null {
   if (value === null || value === undefined) {
     return path.join('.') || '(root)';
+  }
+
+  if (rule.type === 'boolean') {
+    return null;
+  }
+
+  if (rule.type === 'singleSelectWithCustomText') {
+    if (typeof value !== 'object' || value === null) {
+      return path.join('.') || '(root)';
+    }
+    const obj = value as Record<string, unknown>;
+    const typePath = [...path, 'type'];
+    const textPath = [...path, 'text'];
+
+    if (obj.type === null || obj.type === undefined || obj.type === '') {
+      return typePath.join('.');
+    }
+
+    const rawType = obj.type;
+    const selectedType =
+      typeof rawType === 'number'
+        ? rawType
+        : typeof rawType === 'string'
+          ? Number(rawType)
+          : NaN;
+    if (Number.isNaN(selectedType)) {
+      return typePath.join('.');
+    }
+
+    const customValue = rule.customOptionValue ?? 3;
+    if (selectedType === customValue) {
+      const textValue = obj.text;
+      if (
+        textValue === null ||
+        textValue === undefined ||
+        (typeof textValue === 'string' && textValue.trim() === '')
+      ) {
+        return textPath.join('.');
+      }
+    }
+    return null;
+  }
+
+  if (rule.type === 'array') {
+    if (!Array.isArray(value)) {
+      return path.join('.') || '(root)';
+    }
+    if (value.length === 0) {
+      return path.join('.') || '(root)';
+    }
+    if (!rule.schema || rule.schema.length === 0) {
+      return null;
+    }
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i];
+      const itemObj =
+        typeof item === 'object' && item !== null
+          ? (item as Record<string, unknown>)
+          : undefined;
+      for (const subRule of rule.schema) {
+        if (!subRule.required) {
+          continue;
+        }
+        const subValue = itemObj ? itemObj[subRule.key] : undefined;
+        const found = findFirstRequiredEmptyPathByRule(subValue, subRule, [
+          ...path,
+          String(i),
+          subRule.key,
+        ]);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 
   if (typeof value === 'string') {
     return value.trim() === '' ? path.join('.') || '(root)' : null;
   }
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return null;
-  }
-
-  if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return path.join('.') || '(root)';
-    }
-    for (let i = 0; i < value.length; i++) {
-      const found = findFirstEmptyPath(value[i], [...path, String(i)]);
-      if (found) {
-        return found;
-      }
-    }
+  if (typeof value === 'number') {
     return null;
   }
 
   if (typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    const keys = Object.keys(obj);
-    if (keys.length === 0) {
-      return path.join('.') || '(root)';
-    }
-
-    // Special-case: { type: 1|2|3, text: string } where text is only required when type === 3
-    // This is used by the "注销账号文案类型" config: { type: 1, text: '' }.
-    if (
-      'type' in obj &&
-      'text' in obj &&
-      typeof (obj as any).text === 'string' &&
-      Object.keys(obj).length === 2
-    ) {
-      const rawType = (obj as any).type;
-      const t =
-        typeof rawType === 'number'
-          ? rawType
-          : typeof rawType === 'string'
-            ? Number(rawType)
-            : NaN;
-
-      if (!Number.isNaN(t)) {
-        const foundType = findFirstEmptyPath(obj.type, [...path, 'type']);
-        if (foundType) return foundType;
-
-        if (t === 3) {
-          const foundText = findFirstEmptyPath(obj.text, [...path, 'text']);
-          if (foundText) return foundText;
-        }
-
-        // type !== 3 时允许 text 为空，不参与校验
-        return null;
-      }
-    }
-
-    for (const k of keys) {
-      const found = findFirstEmptyPath(obj[k], [...path, k]);
-      if (found) {
-        return found;
-      }
-    }
-    return null;
+    const keys = Object.keys(value as Record<string, unknown>);
+    return keys.length === 0 ? path.join('.') || '(root)' : null;
   }
 
+  return null;
+}
+
+function findFirstRequiredEmptyPath(
+  content: ThemeConfig,
+  rules: ValidationRule[],
+): string | null {
+  for (const rule of rules) {
+    if (!rule.required) {
+      continue;
+    }
+    const value = (content as Record<string, unknown>)[rule.key];
+    const found = findFirstRequiredEmptyPathByRule(value, rule, [rule.key]);
+    if (found) {
+      return found;
+    }
+  }
   return null;
 }
 
@@ -193,7 +246,13 @@ export async function openEditorWithFile(
                 return;
               }
               {
-                const emptyPath = findFirstEmptyPath(message.content);
+                const validationRules = Array.isArray(message.validationRules)
+                  ? message.validationRules
+                  : [];
+                const emptyPath = findFirstRequiredEmptyPath(
+                  message.content,
+                  validationRules,
+                );
                 if (emptyPath) {
                   currentPanel.webview.postMessage({
                     command: 'error',
@@ -227,7 +286,13 @@ export async function openEditorWithFile(
                 return;
               }
               {
-                const emptyPath = findFirstEmptyPath(message.content);
+                const validationRules = Array.isArray(message.validationRules)
+                  ? message.validationRules
+                  : [];
+                const emptyPath = findFirstRequiredEmptyPath(
+                  message.content,
+                  validationRules,
+                );
                 if (emptyPath) {
                   currentPanel.webview.postMessage({
                     command: 'error',

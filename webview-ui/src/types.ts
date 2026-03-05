@@ -12,6 +12,14 @@ export interface ThemeConfig {
   [key: string]: any;
 }
 
+export interface ValidationRule {
+  key: string;
+  type: "text" | "color" | "image" | "boolean" | "singleSelectWithCustomText" | "array";
+  required?: boolean;
+  customOptionValue?: number;
+  schema?: ValidationRule[];
+}
+
 export interface WebviewMessage {
   command: string;
   fileName?: string;
@@ -23,6 +31,7 @@ export interface WebviewMessage {
   namesLine?: string;
   appIdsLine?: string;
   missingTip?: string;
+  validationRules?: ValidationRule[];
 }
 
 export interface WebviewState {
