@@ -27,7 +27,7 @@ type ValidationRule = {
     | 'singleSelectWithCustomText'
     | 'array';
   required?: boolean;
-  customOptionValue?: number;
+  customOptionValue?: string | number;
   schema?: ValidationRule[];
 };
 

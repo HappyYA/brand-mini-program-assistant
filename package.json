@@ -47,6 +47,11 @@
             "type": "string"
           },
           "description": "Webview 的 CSP connect-src 白名单（空数组表示仅允许自动加入的 imageUploadUrl 域名 origin）。示例：['https://api.example.com','https://*.example.com']"
+        },
+        "themeConfigEditor.schemaConfigPath": {
+          "type": "string",
+          "default": ".brand-mini-program-assistant.config.json",
+          "description": "主题编辑 schema 文件路径。相对路径基于工作区根目录，建议将该文件提交到项目仓库中。"
         }
       }
     },

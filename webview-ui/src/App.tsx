@@ -1,7 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import styles from "./App.module.css";
 import { vscode } from "./utils/vscode";
-import type { ThemeConfig, ValidationRule, WebviewMessage } from "./types.ts";
+import type {
+  SchemaField,
+  ThemeConfig,
+  ValidationRule,
+  WebviewMessage,
+} from "./types.ts";
 import { FileList } from "./components/FileList";
 import { FileEditor } from "./components/FileEditor";
 import { InputDialog } from "./components/InputDialog";
@@ -11,6 +16,7 @@ function App() {
   const [nameMap, setNameMap] = useState<Record<string, string>>({});
   const [currentFile, setCurrentFile] = useState<string | null>(null);
   const [currentContent, setCurrentContent] = useState<ThemeConfig>({});
+  const [schemaConfig, setSchemaConfig] = useState<SchemaField[]>([]);
   const [themeName, setThemeName] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
@@ -28,6 +34,7 @@ function App() {
           if (message.fileName && message.content) {
             setCurrentFile(message.fileName);
             setCurrentContent(message.content);
+            setSchemaConfig(message.schemaConfig || []);
             setThemeName(message.themeName);
             setError(null);
           }
@@ -99,32 +106,33 @@ function App() {
         </button>
       </div>
       <div className={styles.main}>
-        {error && (
-          <div className={styles.errorContainer}>
-            <div className={styles.errorMessage}>{error}</div>
-          </div>
-        )}
-        <h2 id="currentFileName">{currentFile || "请选择一个文件"}</h2>
-        {themeName && (
-          <div
-            style={{
-              color: "var(--vscode-descriptionForeground)",
-              fontSize: "14px",
-              marginBottom: "15px",
-            }}
-          >
-            主题: {themeName}
-          </div>
-        )}
+        <div className={styles.mainHeader}>
+          {error && (
+            <div className={styles.errorContainer}>
+              <div className={styles.errorMessage}>{error}</div>
+            </div>
+          )}
+          <h2 id="currentFileName" className={styles.currentFileName}>
+            {currentFile || "请选择一个文件"}
+          </h2>
+          {themeName && (
+            <div className={styles.themeName}>主题: {themeName}</div>
+          )}
+        </div>
 
-        {currentFile && (
-          <FileEditor
-            fileName={currentFile}
-            initialContent={currentContent}
-            onChange={setCurrentContent}
-            onSave={handleSave}
-          />
-        )}
+        <div className={styles.mainBody}>
+          {currentFile ? (
+            <FileEditor
+              fileName={currentFile}
+              initialContent={currentContent}
+              schemaConfig={schemaConfig}
+              onChange={setCurrentContent}
+              onSave={handleSave}
+            />
+          ) : (
+            <div className={styles.emptyState}>请选择一个主题配置文件</div>
+          )}
+        </div>
       </div>
 
       {isDialogVisible && (

@@ -86,6 +86,25 @@ class VSCodeAPIWrapper {
               ],
               memberCard: true,
             },
+            schemaConfig: [
+              { key: "appId", label: "小程序App ID", type: "text", required: true },
+              { key: "brandCode", label: "Brand Code", type: "text", required: true },
+              { key: "themeColor", label: "主题颜色", type: "color", required: true },
+              {
+                key: "tabbar",
+                label: "底部导航栏配置",
+                type: "array",
+                required: true,
+                defaultValue: [
+                  { pagePath: "pages/home/index", text: "首页", hidden: false },
+                ],
+                schema: [
+                  { key: "pagePath", label: "页面路径", type: "text", required: true },
+                  { key: "text", label: "底部导航栏文字", type: "text", required: true },
+                  { key: "hidden", label: "是否隐藏显示", type: "boolean", required: true },
+                ],
+              },
+            ],
             themeName:
               fileName === "brand_a.json" ? "Brand A (Mock)" : "Brand B (Mock)",
           });

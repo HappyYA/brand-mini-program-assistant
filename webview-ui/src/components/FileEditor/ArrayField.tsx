@@ -1,17 +1,12 @@
 import React from "react";
 import styles from "./FileEditor.module.css";
 import { Field } from "./Field";
-
-interface SchemaItem {
-  key: string;
-  label: string;
-  type: "text" | "color" | "image" | "boolean";
-}
+import type { SchemaField } from "../../types";
 
 interface ArrayFieldProps {
   label: string;
   items: any[];
-  schema: SchemaItem[];
+  schema: SchemaField[];
   onChange: (items: any[]) => void;
 }
 
@@ -62,7 +57,10 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
               <div key={field.key} className={styles.arrayField}>
                 <Field
                   label={field.label}
-                  type={field.type}
+                  type={field.type === "array" ? "text" : field.type}
+                  options={field.options}
+                  customOptionValue={field.customOptionValue}
+                  customTextPlaceholder={field.customTextPlaceholder}
                   value={item[field.key]}
                   onChange={(val) => handleItemChange(index, field.key, val)}
                 />

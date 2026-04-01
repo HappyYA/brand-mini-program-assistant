@@ -17,6 +17,23 @@
 3. 在可视化界面中编辑配置
 4. 点击保存按钮应用更改
 
+## Schema 配置
+
+推荐将 schema 写在项目根目录的 `.brand-mini-program-assistant.config.json` 中，并提交到仓库。
+
+- 这样字段定义、默认值、数组子项结构都由项目自己维护，团队成员共享同一份约束
+- 如果项目不想使用默认文件名，可以通过 VS Code 配置 `themeConfigEditor.schemaConfigPath` 指向其他相对路径或绝对路径
+- 可参考示例文件：`.brand-mini-program-assistant.config.example.json`
+
+`type` 当前支持：
+
+- `text`
+- `color`
+- `image`
+- `boolean`
+- `singleSelectWithCustomText`
+- `array`
+
 ## 支持的字段类型
 
 - 文本字段

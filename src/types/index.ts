@@ -14,17 +14,36 @@ export interface ThemeConfig {
   [key: string]: any;
 }
 
+export type FieldType =
+  | 'text'
+  | 'color'
+  | 'image'
+  | 'boolean'
+  | 'singleSelectWithCustomText'
+  | 'array';
+
+export interface FieldOption {
+  value: string | number;
+  label: string;
+}
+
+export interface SchemaField {
+  key: string;
+  label: string;
+  type: FieldType;
+  required?: boolean;
+  options?: FieldOption[];
+  defaultValue?: any;
+  customOptionValue?: string | number;
+  customTextPlaceholder?: string;
+  schema?: SchemaField[];
+}
+
 export interface ValidationRule {
   key: string;
-  type:
-    | 'text'
-    | 'color'
-    | 'image'
-    | 'boolean'
-    | 'singleSelectWithCustomText'
-    | 'array';
+  type: FieldType;
   required?: boolean;
-  customOptionValue?: number;
+  customOptionValue?: string | number;
   schema?: ValidationRule[];
 }
 
@@ -37,6 +56,7 @@ export interface WebviewMessage {
   content?: ThemeConfig | string;
   text?: string;
   validationRules?: ValidationRule[];
+  schemaConfig?: SchemaField[];
 }
 
 /**

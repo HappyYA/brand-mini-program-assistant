@@ -1,14 +1,15 @@
 import React, { useId, useRef, useState } from 'react';
 import styles from './FileEditor.module.css';
 import { vscode } from '../../utils/vscode';
+import type { FieldOption, FieldType } from '../../types';
 
 interface FieldProps {
   label: string;
   value: any;
   onChange: (value: any) => void;
-  type?: 'text' | 'color' | 'image' | 'boolean' | 'singleSelectWithCustomText';
-  options?: Array<{ value: number; label: string }>;
-  customOptionValue?: number; // default 3
+  type?: Exclude<FieldType, 'array'>;
+  options?: FieldOption[];
+  customOptionValue?: string | number; // default 3
   customTextPlaceholder?: string;
 }
 
@@ -164,13 +165,16 @@ export const Field: React.FC<FieldProps> = ({
 
     const safeValue =
       value && typeof value === 'object'
-        ? { type: Number((value as any).type) || 1, text: String((value as any).text || '') }
+        ? {
+            type: (value as any).type ?? 1,
+            text: String((value as any).text || ''),
+          }
         : { type: 1, text: '' };
 
     const selectedType = safeValue.type;
     const customText = safeValue.text;
 
-    const setType = (t: number) => {
+    const setType = (t: string | number) => {
       onChange({
         type: t,
         text: t === customOptionValue ? customText : '',

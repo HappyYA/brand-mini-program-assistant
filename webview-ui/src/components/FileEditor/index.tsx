@@ -2,118 +2,27 @@ import React, { useEffect, useState } from "react";
 import styles from "./FileEditor.module.css";
 import { Field } from "./Field";
 import { ArrayField } from "./ArrayField";
-import type { ThemeConfig, ValidationRule } from "../../types";
-
-type FieldType =
-  | "text"
-  | "color"
-  | "image"
-  | "boolean"
-  | "singleSelectWithCustomText"
-  | "array";
+import type { SchemaField, ThemeConfig, ValidationRule } from "../../types";
 
 interface FileEditorProps {
   fileName: string;
   initialContent: ThemeConfig;
+  schemaConfig: SchemaField[];
   onChange: (content: ThemeConfig) => void;
   onSave: (rules: ValidationRule[]) => void;
 }
-// Default keys structure to know types
-const KEYS_CONFIG = [
-  { key: "appId", label: "小程序App ID", type: "text", required: true },
-  { key: "brandCode", label: "Brand Code", type: "text", required: true },
-  { key: "groupCode", label: "Group Code", type: "text", required: true },
-  { key: "themeColor", label: "主题颜色", type: "color", required: true },
-  {
-    key: "homeBackgroundImage",
-    label: "首页背景图片",
-    type: "image",
-    required: true,
-  },
-  {
-    key: "homeBackgroundImageMini",
-    label: "首页背景图片(小图)",
-    type: "image",
-    required: true,
-  },
-  {
-    key: "homeBackgroundColor",
-    label: "首页背景颜色",
-    type: "color",
-    required: true,
-  },
-  { key: "myHeaderBg", label: "我的页面背景图片", type: "image", required: true },
-  {
-    key: "myHeaderTextColor",
-    label: "头像右侧文字正常颜色",
-    type: "color",
-    required: true,
-  },
-  {
-    key: "myHeaderTextGrayColor",
-    label: "头像右侧文字浅颜色",
-    type: "text",
-    required: true,
-  },
-  { key: "defaultAvatar", label: "默认头像图片", type: "image", required: true },
-  { key: "realNameAuthBg", label: "实名认证背景图", type: "image", required: true },
-  { key: "memberCard", label: "付费会员开关", type: "boolean", required: true },
-  {
-    key: "memberCardGradientBg",
-    label:
-      "付费会员梯度按钮背景色（示例：linear-gradient(90deg, #FFF6E2 0%, #FFFBF1 100%)）",
-    type: "text",
-    required: false,
-  },
-  {
-    key: "memberCardTimerBg",
-    label: "付费会员身份验证倒计时背景",
-    type: "image",
-    required: false,
-  },
-  {
-    key: "cancelAccountTextType",
-    label: "注销账号文案类型",
-    type: "singleSelectWithCustomText",
-    required: true,
-    options: [
-      { value: 1, label: "显示资产" },
-      { value: 2, label: "不显示资产" },
-      { value: 3, label: "自定义" },
-    ],
-    defaultValue: { type: 1, text: "" },
-    customOptionValue: 3,
-    customTextPlaceholder: "请输入自定义文案",
-  },
-  {
-    key: "cancelAccountWay",
-    label: "注销账号方式",
-    type: "singleSelectWithCustomText",
-    required: true,
-    options: [
-      { value: 1, label: "自主注销" },
-      { value: 2, label: "电话注销" },
-    ],
-    defaultValue: { type: 1, text: "" },
-    customOptionValue: 2,
-    customTextPlaceholder: "请输入品牌电话号码",
-  },
-  {
-    key: "tabbar",
-    label: "底部导航栏配置",
-    type: "array",
-    required: true,
-    schema: [
-      { key: "pagePath", label: "页面路径", type: "text", required: true },
-      { key: "text", label: "底部导航栏文字", type: "text", required: true },
-      { key: "hidden", label: "是否隐藏显示", type: "boolean", required: true },
-    ],
-  },
-] as const;
+
+function cloneValue<T>(value: T): T {
+  if (value === undefined) {
+    return value;
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+}
 
 export const FileEditor: React.FC<FileEditorProps> = ({
   fileName,
   initialContent,
+  schemaConfig,
   onChange,
   onSave,
 }) => {
@@ -125,10 +34,13 @@ export const FileEditor: React.FC<FileEditorProps> = ({
     let hasChanges = false;
 
     // Ensure all config keys exist
-    KEYS_CONFIG.forEach((cfg) => {
+    schemaConfig.forEach((cfg) => {
       // @ts-ignore
       if (merged[cfg.key] === undefined || merged[cfg.key] === null) {
-        if (cfg.type === "array") {
+        if (cfg.defaultValue !== undefined) {
+          // @ts-ignore
+          merged[cfg.key] = cloneValue(cfg.defaultValue);
+        } else if (cfg.type === "array") {
           // @ts-ignore
           merged[cfg.key] = [];
         } else if (cfg.type === "boolean") {
@@ -136,8 +48,8 @@ export const FileEditor: React.FC<FileEditorProps> = ({
           merged[cfg.key] = false;
         } else if (cfg.type === "singleSelectWithCustomText") {
           // @ts-ignore
-          merged[cfg.key] = cfg.defaultValue
-            ? { ...cfg.defaultValue }
+          merged[cfg.key] = cfg.defaultValue !== undefined
+            ? cloneValue(cfg.defaultValue)
             : { type: 1, text: "" };
         } else {
           // @ts-ignore
@@ -153,7 +65,7 @@ export const FileEditor: React.FC<FileEditorProps> = ({
     const extraKeys: any[] = [];
     Object.keys(merged).forEach((k) => {
       // @ts-ignore
-      if (!KEYS_CONFIG.find((cfg) => cfg.key === k)) {
+      if (!schemaConfig.find((cfg) => cfg.key === k)) {
         extraKeys.push({ key: k, label: k, type: "text" });
       }
     });
@@ -162,7 +74,7 @@ export const FileEditor: React.FC<FileEditorProps> = ({
     if (hasChanges) {
       onChange(merged);
     }
-  }, [initialContent, fileName]);
+  }, [initialContent, fileName, onChange, schemaConfig]);
 
   const handleChange = (key: string, value: any) => {
     const newContent = { ...content, [key]: value };
@@ -171,16 +83,14 @@ export const FileEditor: React.FC<FileEditorProps> = ({
   };
 
   const getValidationRules = (): ValidationRule[] => {
-    return KEYS_CONFIG.map((field) => ({
+    return schemaConfig.map((field) => ({
       key: field.key,
-      type: field.type as FieldType,
+      type: field.type,
       required: field.required ?? true,
-      // @ts-ignore
       customOptionValue: field.customOptionValue,
-      // @ts-ignore
       schema: field.schema?.map((subField: any) => ({
         key: subField.key,
-        type: subField.type as FieldType,
+        type: subField.type,
         required: subField.required ?? true,
       })),
     }));
@@ -189,7 +99,7 @@ export const FileEditor: React.FC<FileEditorProps> = ({
   return (
     <div style={{ paddingBottom: "90px" }}>
       <div id="formContainer">
-        {KEYS_CONFIG.map((field) => {
+        {schemaConfig.map((field) => {
           if (field.type === "array" && field.schema) {
             return (
               <ArrayField
@@ -197,7 +107,6 @@ export const FileEditor: React.FC<FileEditorProps> = ({
                 label={field.label}
                 // @ts-ignore
                 items={content[field.key] || []}
-                // @ts-ignore
                 schema={field.schema}
                 onChange={(val) => handleChange(field.key, val)}
               />
@@ -207,13 +116,9 @@ export const FileEditor: React.FC<FileEditorProps> = ({
             <Field
               key={field.key}
               label={field.label}
-              // @ts-ignore
-              type={field.type}
-              // @ts-ignore
+              type={field.type === "array" ? "text" : field.type}
               options={field.options}
-              // @ts-ignore
               customOptionValue={field.customOptionValue}
-              // @ts-ignore
               customTextPlaceholder={field.customTextPlaceholder}
               value={content[field.key]}
               onChange={(val) => handleChange(field.key, val)}

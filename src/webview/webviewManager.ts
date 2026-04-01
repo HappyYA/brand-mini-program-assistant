@@ -2,48 +2,44 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { promises as fs, existsSync } from "fs";
 import { ThemeConfig, WebviewMessage } from "../types";
-import { getThemeConfigPath, getMiniConfigMapping } from "../utils/config";
+import {
+  getThemeConfigPath,
+  getMiniConfigMapping,
+  getThemeSchemaConfig,
+} from "../utils/config";
 import { isValidFileName } from "../utils/validators";
 
-const DEFAULT_TABBAR = [
-  {
-    pagePath: "pages/home/index",
-    text: "首页",
-    hidden: false,
-  },
-  {
-    pagePath: "pages/allOrder/index",
-    text: "订单",
-    hidden: false,
-  },
-  {
-    pagePath: "pages/memberCard/index",
-    text: "付费会员",
-    hidden: true,
-  },
-  {
-    pagePath: "pages/mine/index",
-    text: "我的",
-    hidden: false,
-  },
-];
-
-export function getDefaultThemeConfig(): ThemeConfig {
-  return {
-    tabbar: DEFAULT_TABBAR,
-  };
+function cloneValue<T>(value: T): T {
+  if (value === undefined) {
+    return value;
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function applyDefaultsForNewFile(content: ThemeConfig): ThemeConfig {
-  // 仅在新建时补默认值：如果用户已经传了 tabbar，则不覆盖
-  if (content && Array.isArray((content as any).tabbar)) {
-    return content;
+export async function getDefaultThemeConfig(): Promise<ThemeConfig> {
+  const schemaConfig = await getThemeSchemaConfig();
+  return schemaConfig.reduce<ThemeConfig>((result, field) => {
+    if (field.defaultValue !== undefined) {
+      result[field.key] = cloneValue(field.defaultValue);
+    }
+    return result;
+  }, {});
+}
+
+async function applyDefaultsForNewFile(content: ThemeConfig): Promise<ThemeConfig> {
+  const schemaConfig = await getThemeSchemaConfig();
+  const merged = { ...content };
+
+  for (const field of schemaConfig) {
+    if (
+      merged[field.key] === undefined &&
+      field.defaultValue !== undefined
+    ) {
+      merged[field.key] = cloneValue(field.defaultValue);
+    }
   }
 
-  return {
-    ...content,
-    tabbar: DEFAULT_TABBAR,
-  };
+  return merged;
 }
 
 /**
@@ -115,6 +111,7 @@ export async function sendFileContentToWebview(
   }
 
   try {
+    const schemaConfig = await getThemeSchemaConfig();
     if (existsSync(filePath)) {
       const content = await fs.readFile(filePath, "utf-8");
       try {
@@ -134,6 +131,7 @@ export async function sendFileContentToWebview(
           fileName,
           content: parsed,
           themeName: themeName || undefined,
+          schemaConfig,
         });
       } catch (parseErr) {
         panel.webview.postMessage({
@@ -146,7 +144,8 @@ export async function sendFileContentToWebview(
       panel.webview.postMessage({
         command: "fileContent",
         fileName,
-        content: getDefaultThemeConfig(),
+        content: await getDefaultThemeConfig(),
+        schemaConfig,
       });
     }
   } catch (err) {
@@ -189,7 +188,7 @@ export async function saveFile(fileName: string, content: ThemeConfig) {
  * 创建文件
  */
 export async function createFile(fileName: string, content: ThemeConfig) {
-  await saveFile(fileName, applyDefaultsForNewFile(content));
+  await saveFile(fileName, await applyDefaultsForNewFile(content));
 }
 
 /**
